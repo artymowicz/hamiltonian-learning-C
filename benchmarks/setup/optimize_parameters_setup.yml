@@ -1,0 +1,17 @@
+# Configuration for optimize_parameters.cpp
+# Automatically finds optimal dt and svd_min to achieve target error
+
+# Target parameters
+target_error: 1.0e-9      # Maximum acceptable error in expectation values
+n: 8                      # System size (for ED comparison, keep n <= 12)
+
+# Algorithm parameters
+svd_min_step: 10.0        # Factor to decrease svd_min by each step
+dt_step: 2.0              # Factor to decrease dt by each step
+
+# Initial guess
+initial_dt: 0.01          # Starting timestep (will be adjusted to be commensurate with beta/2)
+initial_svd_min: 1.0e-16  # Starting SVD cutoff threshold
+
+# MPS parameters
+chi_max: 20              # Maximum bond dimension

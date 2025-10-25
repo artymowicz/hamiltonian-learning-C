@@ -1,0 +1,40 @@
+# Configuration for Trotter error analysis test
+# This file tests how dt and svd_min affect thermal state accuracy
+
+# System parameters
+n: 10
+hamiltonian: "tf_ising_ferro.yml"
+beta: 0.1
+
+# Hamiltonian couplings
+couplings:
+  g: 0.5
+
+# Operators to test
+# Include both single-site and multi-site operators to see how correlations are affected
+operators:
+  - "IIIIIIIIII"   # Identity (should always be 1)
+  - "IIIIIZIIII"   # Single-site Z
+  - "IIIIIZZIII"   # Two-site correlation (most sensitive to truncation error)
+  - "IIIIIZZZII"   # Three-site correlation
+  - "IIIIIXXIII"   # X correlation (should be ~0)
+
+# Timesteps to test (in ascending order)
+dts:
+  - 1.0e-3
+  - 1.0e-4
+  - 1.0e-5
+  - 1.0e-6
+
+# SVD cutoffs to test (in descending order)
+# 0 means no truncation (only chi_max constraint)
+svd_mins:
+  - 1.e-10
+  - 1.e-12
+  - 1.e-14
+
+# Maximum bond dimensions to test
+chi_maxs:
+  - 4
+  - 16
+  - 32

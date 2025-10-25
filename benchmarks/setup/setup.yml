@@ -1,0 +1,27 @@
+# Thermal state computation parameters
+dt: 1.0e-2
+svd_min: 1.0e-12
+chi_max: 100
+naive: false
+quiet: true
+
+# Expectations computation parameters
+expectations_n_threads: 0  # 0=all cores, 1=single-threaded (non-parallel DFS), >1=that many threads
+
+# System parameters (can be overridden by command line arguments)
+hamiltonian: "xxz.yml"
+n: 50
+beta: 0.1
+couplings:
+  g: 0.5
+
+# Certified bounds parameters
+epsilon_W: 0.01
+eps_0: 1.0e-10
+printing_level: 3
+
+# Target operators for certified bounds computation
+# Specify in human-readable format: "Z_0 Z_1" or "Z0 Z1" (0-indexed sites)
+# Bounds will be computed for each operator independently
+target_operators:
+  - "Z0 Z1"  # Equivalent to "ZZIII" for n=5

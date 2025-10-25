@@ -1,0 +1,81 @@
+# Build directories
+build/
+cmake-build-*/
+*.build/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+1d_certified_bounds_benchmark
+error_estimate
+optimize_parameters
+example_certified_bounds
+test_pauli_utils
+test_simulation
+test_trotter_error
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Development/deployment scripts (not for public repo)
+CLAUDE.md
+claude.md
+setup_ec2_cpp.sh
+push.sh
+porting_claude_convo.txt
+
+# Old/archived files
+old_files/
+benchmarks/tests/old_tests/
+benchmarks/tests/obsolete_tests/
+
+# Example files (development only)
+benchmarks/example_certified_bounds.cpp
+
+# Output files
+*.txt
+!CMakeLists.txt
+
+# Python cache (if any Python scripts added later)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Backup files
+*.bak
+*.backup
