@@ -1,6 +1,6 @@
 #include "simulation.hpp"
 #include "pauli_utils.hpp"
-#include "../include/hamiltonian_learning.hpp"
+#include "hamiltonian_learning.hpp"
 #include <iostream>
 #include <iomanip>
 #include <fstream>

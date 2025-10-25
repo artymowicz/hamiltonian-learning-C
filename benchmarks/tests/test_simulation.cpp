@@ -1,5 +1,5 @@
-#include "../examples/simulation.hpp"
-#include "../examples/pauli_utils.hpp"
+#include "simulation.hpp"
+#include "pauli_utils.hpp"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
