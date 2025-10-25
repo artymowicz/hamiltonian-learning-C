@@ -67,6 +67,9 @@ benchmarks/tests/obsolete_tests/
 # Example files (development only)
 benchmarks/example_certified_bounds.cpp
 
+# Test files (development only)
+benchmarks/tests/test_trotter_error.cpp
+
 # Output files
 *.txt
 !CMakeLists.txt

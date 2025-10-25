@@ -147,12 +147,6 @@ target_link_libraries(test_simulation
         simulation
 )
 
-add_executable(test_trotter_error tests/test_trotter_error.cpp)
-target_link_libraries(test_trotter_error
-    PRIVATE
-        simulation
-)
-
 # ============================================================================
 # Copy Setup and Hamiltonian Files to Build Directory
 # ============================================================================
