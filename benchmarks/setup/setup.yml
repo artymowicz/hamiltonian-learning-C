@@ -1,6 +1,6 @@
 # Thermal state computation parameters
 dt: 1.0e-2
-svd_min: 1.0e-12
+svd_min: 1.0e-16
 chi_max: 100
 naive: false
 quiet: true
@@ -10,7 +10,7 @@ expectations_n_threads: 0  # 0=all cores, 1=single-threaded (non-parallel DFS), 
 
 # System parameters (can be overridden by command line arguments)
 hamiltonian: "xxz.yml"
-n: 50
+n: 10
 beta: 0.1
 couplings:
   g: 0.5
