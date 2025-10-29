@@ -316,24 +316,35 @@ CertifiedBoundsResult certifiedBoundsV2(
             constraint_exprs.push_back(expr);
         }
 
-        // Convert vector to monty::ndarray for vstack
-        auto exprs_array = std::make_shared<monty::ndarray<mosek::fusion::Expression::t, 1>>(
-            monty::shape(q));
-        for (int i = 0; i < q; ++i) {
-            (*exprs_array)[i] = constraint_exprs[i];
-        }
-        auto constraint_expr = mosek::fusion::Expr::vstack(exprs_array);
-
+        // Build constraint expression (handle q=1 case specially)
+        mosek::fusion::Expression::t constraint_expr;
         if (q == 1) {
-            tprint("warning: q = 1 and MOSEK has weird behaviour when this is the case :(");
+            // For q=1, use the single expression directly without vstack
+            constraint_expr = constraint_exprs[0];
+        } else {
+            // For q>1, use vstack to combine multiple expressions
+            auto exprs_array = std::make_shared<monty::ndarray<mosek::fusion::Expression::t, 1>>(
+                monty::shape(q));
+            for (int i = 0; i < q; ++i) {
+                (*exprs_array)[i] = constraint_exprs[i];
+            }
+            constraint_expr = mosek::fusion::Expr::vstack(exprs_array);
         }
 
         // First constraint: equals to -v @ S
         VectorXd constraint_rhs = -v.transpose() * S_real;
-        auto constraint_a = M->constraint("a", constraint_expr,
-            mosek::fusion::Domain::equalsTo(
-                std::make_shared<monty::ndarray<double, 1>>(
-                    constraint_rhs.data(), monty::shape(q))));
+        mosek::fusion::Constraint::t constraint_a;
+        if (q == 1) {
+            // For q=1, constraint_rhs is a scalar
+            constraint_a = M->constraint("a", constraint_expr,
+                mosek::fusion::Domain::equalsTo(constraint_rhs(0)));
+        } else {
+            // For q>1, constraint_rhs is a vector
+            constraint_a = M->constraint("a", constraint_expr,
+                mosek::fusion::Domain::equalsTo(
+                    std::make_shared<monty::ndarray<double, 1>>(
+                        constraint_rhs.data(), monty::shape(q))));
+        }
 
         // Set up objective function
         if (printing_level > 2) {
@@ -370,10 +381,17 @@ CertifiedBoundsResult certifiedBoundsV2(
         // Solve for upper bound by replacing v with -v
         constraint_a->remove();
         VectorXd constraint_rhs_upper = v.transpose() * S_real;
-        M->constraint("b", constraint_expr,
-            mosek::fusion::Domain::equalsTo(
-                std::make_shared<monty::ndarray<double, 1>>(
-                    constraint_rhs_upper.data(), monty::shape(q))));
+        if (q == 1) {
+            // For q=1, constraint_rhs_upper is a scalar
+            M->constraint("b", constraint_expr,
+                mosek::fusion::Domain::equalsTo(constraint_rhs_upper(0)));
+        } else {
+            // For q>1, constraint_rhs_upper is a vector
+            M->constraint("b", constraint_expr,
+                mosek::fusion::Domain::equalsTo(
+                    std::make_shared<monty::ndarray<double, 1>>(
+                        constraint_rhs_upper.data(), monty::shape(q))));
+        }
 
         M->solve();
         result.upper_bound = -M->primalObjValue();
