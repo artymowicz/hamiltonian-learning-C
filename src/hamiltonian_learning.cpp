@@ -11,6 +11,7 @@
 namespace hamiltonian_learning {
 
 // Utility printing functions
+// Original signature (to std::cout)
 void tprint(const std::string& s, bool flush) {
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
@@ -21,6 +22,19 @@ void tprint(const std::string& s, bool flush) {
         std::cout << std::flush;
     }
     std::cout << std::endl;
+}
+
+// Overload with custom ostream
+void tprint(const std::string& s, std::ostream& output, bool flush) {
+    auto now = std::chrono::system_clock::now();
+    auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    auto tm = *std::localtime(&time_t_now);
+
+    output << std::put_time(&tm, "%H:%M:%S") << ": " << s;
+    if (flush) {
+        output << std::flush;
+    }
+    output << std::endl;
 }
 
 MatrixXc dag(const MatrixXc& M) {
@@ -68,6 +82,23 @@ CertifiedBoundsResult certifiedBoundsV2(
     } else if (C_eigvals(0) < small) {
         if (printing_level > 0) {
             tprint("WARNING: Covariance matrix is near singular");
+        }
+    }
+
+    // Print norms of C and C^{-1}
+    if (printing_level > 0) {
+        // ||C|| = largest eigenvalue
+        double C_norm = C_eigvals(C_eigvals.size() - 1);
+        // ||C^{-1}|| = 1 / smallest eigenvalue
+        double C_inv_norm = 1.0 / C_eigvals(0);
+        tprintf("||C|| = %.6e, ||C^{-1}|| = %.6e", C_norm, C_inv_norm);
+        tprintf("delta = r*eps_0 = %d * %.6e = %.6e", r, epsilon_0, r * epsilon_0);
+
+        // Check that kappa*delta < 1 (required for new mu_1 formula)
+        double kappa_delta = C_inv_norm * r * epsilon_0;
+        if (kappa_delta >= 1.0) {
+            throw std::runtime_error("Condition kappa*delta < 1 violated: kappa*delta = " +
+                                     std::to_string(kappa_delta) + " >= 1");
         }
     }
 
@@ -159,16 +190,24 @@ CertifiedBoundsResult certifiedBoundsV2(
     MatrixXc logDelta = sqrtD.asDiagonal() * X.log() * sqrtD.asDiagonal();
 
     // Computing mu_1 and mu_2
-    double kappa = 2.0 / C_eigvals.minCoeff();
-    double nu = 2.0 * C_eigvals.maxCoeff();
+    // New formula: nu = ||C||, kappa = ||C^{-1}||
+    double kappa = 1.0 / C_eigvals.minCoeff();
+    double nu = C_eigvals.maxCoeff();
+    double delta = r * epsilon_0;
 
-    double mu_1 = (nu * kappa * (3.0 + 2.0 * nu * kappa) + 2.0 * s * beta) * r * epsilon_0;
+    double mu_1 = delta * (kappa * (4.0 * nu + 2.0 * delta +
+                   2.0 * (nu + delta) * (nu + delta) * kappa / (1.0 - delta * kappa)) +
+                   2.0 * s * beta);
     double mu_2 = s * beta * r * epsilon_0;
 
     result.mu_1 = mu_1;
     result.mu_2 = mu_2;
     result.kappa = kappa;
     result.nu = nu;
+
+    if (printing_level > 0) {
+        tprintf("mu_1 = %.6e, mu_2 = %.6e", mu_1, mu_2);
+    }
 
     if (printing_level > 2) {
         tprint("setting up MOSEK optimization problem");
